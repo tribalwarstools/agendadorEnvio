@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     if (!window.TribalWars) {
         alert("Este script deve ser executado dentro do Tribal Wars.");
         return;
@@ -22,12 +22,12 @@
         right:20px;
         width:320px;
         z-index:99999;
-        background:white;
-        border:2px solid #888;
+        background:#f4e4bc;
+        border:2px solid #c1a264;
         border-radius:8px;
-        box-shadow:0 0 10px rgba(0,0,0,0.2);
+        box-shadow:0 0 10px rgba(0,0,0,0.3);
         padding:12px;
-        font-family:Arial;
+        font-family:Verdana, sans-serif;
         display:flex;
         flex-direction:column;
         gap:10px;
@@ -35,21 +35,21 @@
 
     painel.innerHTML = `
         <div id="ag_header" style="display:flex; justify-content:space-between; align-items:center; cursor:move;">
-            <h2>Agendador de Envio de Tropas</h2>
-            <button id="fechar_painel_ag" style="background:#f44336; color:white; border:none; border-radius:4px; padding:2px 6px; cursor:pointer;">✖</button>
+            <h3 style="margin:0; font-size:14px;">⚔️ Agendador de Envio</h3>
+            <button id="fechar_painel_ag" style="background:#c00; color:white; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">✖</button>
         </div>
-        <label>📅 Data alvo:<br><input id="ag_data" type="text" placeholder="19/07/2025" style="padding:5px; width:auto; border:1px solid #ccc; border-radius:5px;"></label>
-        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text" placeholder="14:33:00" style="padding:5px; width:auto; border:1px solid #ccc; border-radius:5px;"></label>
-        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:auto; border:1px solid #ccc; border-radius:5px;"></label>
+        <label>📅 Data alvo:<br><input id="ag_data" type="text" value="23/07/2025" placeholder="DD/MM/AAAA" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text" value="21:40:01" placeholder="hh:mm:ss" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
         <div>
-          <label><input type="radio" name="modo_agendamento" value="saida" checked>🚀Horário de saída</label>
-          <label style="margin-left:10px;"><input type="radio" name="modo_agendamento" value="chegada">🎯Horário de chegada</label>
+          <label><input type="radio" name="modo_agendamento" value="saida" checked> 🚀 Saída</label>
+          <label style="margin-left:10px;"><input type="radio" name="modo_agendamento" value="chegada"> 🎯 Chegada</label>
         </div>
         <div style="display:flex; gap:8px;">
-            <button id="btn_salvar" class="btn" style="flex:1; background:#4CAF50; color:white; border:none; border-radius:5px; padding:6px;">💾 Salvar</button>
-            <button id="btn_limpar" class="btn" style="flex:1; background:#f44336; color:white; border:none; border-radius:5px; padding:6px;">🗑️ Limpar</button>
+            <button id="btn_salvar" class="btn" style="flex:1; background:#6b8e23; color:white; border:none; border-radius:5px; padding:6px;">💾 Salvar</button>
+            <button id="btn_limpar" class="btn" style="flex:1; background:#a52a2a; color:white; border:none; border-radius:5px; padding:6px;">🗑️ Limpar</button>
         </div>
-        <div id="lista_horarios" style="max-height:150px; overflow:auto; border:1px solid #ccc; padding:5px; background:#f9f9f9; border-radius:5px;"></div>
+        <div id="lista_horarios" style="max-height:150px; overflow:auto; border:1px solid #c1a264; padding:5px; background:#fff8dc; border-radius:5px;"></div>
         <p id="ag_status" style="font-weight:bold;"></p>
     `;
 
@@ -293,8 +293,11 @@
             removerBotaoCancelar();
         }, millis);
 
-        intervaloCountdown = setInterval(() => {
-            const restante = millis - (Date.now() - (target - millis));
+		const inicio = Date.now();
+		intervaloCountdown = setInterval(() => {
+				const decorrido = Date.now() - inicio;
+				const restante = millis - decorrido;
+
             if (restante <= 0) {
                 clearInterval(intervaloCountdown);
             } else {
