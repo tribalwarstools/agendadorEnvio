@@ -38,8 +38,8 @@
             <h3 style="margin:0; font-size:14px;">⚔️ Agendador de Envio</h3>
             <button id="fechar_painel_ag" style="background:#c00; color:white; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">✖</button>
         </div>
-        <label>📅 Data alvo:<br><input id="ag_data" type="text" value="23/07/2025" placeholder="DD/MM/AAAA" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text" value="21:40:01" placeholder="hh:mm:ss" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>📅 Data alvo:<br><input id="ag_data" type="text"  placeholder="DD/MM/AAAA" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text"  placeholder="hh:mm:ss" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
         <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
         <div>
           <label><input type="radio" name="modo_agendamento" value="saida" checked> 🚀 Saída</label>
@@ -54,6 +54,12 @@
     `;
 
     document.body.appendChild(painel);
+const dataServidor = document.getElementById("serverDate")?.textContent.trim();
+    const horaServidor = document.getElementById("serverTime")?.textContent.trim();
+    if (dataServidor && horaServidor) {
+        document.getElementById("ag_data").value = dataServidor;
+        document.getElementById("ag_hora").value = horaServidor;
+    }
 
     const status = document.getElementById("ag_status");
 
@@ -134,27 +140,7 @@
         if (confirm("Deseja apagar todos os horários salvos?")) {
             localStorage.removeItem("horarios_salvos");
             
-    /* // === ANTILOGOFF ===
 
-    // 1. Ping ao servidor a cada 4 minutos
-    setInterval(() => {
-        fetch('/game.php?screen=overview')
-            .then(() => console.log("[Ping] Sessão mantida"));
-    }, 1000 * 60 * 4); // 4 minutos
-
-    // 2. Simulação de movimento do mouse
-    setInterval(() => {
-        const evt = new MouseEvent('mousemove', { bubbles: true });
-        document.dispatchEvent(evt);
-        console.log("[Mouse] Movimento simulado");
-    }, 1000 * 60 * 5); // 5 minutos
-
-    // 3. Simulação de pressionamento de tecla
-    setInterval(() => {
-        const evt = new KeyboardEvent('keydown', { key: 'Shift' });
-        document.dispatchEvent(evt);
-        console.log("[Tecla] Pressionamento simulado");
-    }, 1000 * 60 * 6); // 6 minutos */
 
     atualizarLista();
         }
@@ -196,28 +182,7 @@
                 lista.splice(parseInt(btn.dataset.remover), 1);
                 localStorage.setItem("horarios_salvos", JSON.stringify(lista));
                 
-    /* // === ANTILOGOFF ===
 
-    // 1. Ping ao servidor a cada 4 minutos
-    setInterval(() => {
-        fetch('/game.php?screen=overview')
-            .then(() => console.log("[Ping] Sessão mantida"));
-    }, 1000 * 60 * 4); // 4 minutos
-
-    // 2. Simulação de movimento do mouse
-    setInterval(() => {
-        const evt = new MouseEvent('mousemove', { bubbles: true });
-        document.dispatchEvent(evt);
-        console.log("[Mouse] Movimento simulado");
-    }, 1000 * 60 * 5); // 5 minutos
-
-    // 3. Simulação de pressionamento de tecla
-    setInterval(() => {
-        const evt = new KeyboardEvent('keydown', { key: 'Shift' });
-        document.dispatchEvent(evt);
-        console.log("[Tecla] Pressionamento simulado");
-    }, 1000 * 60 * 6); // 6 minutos
- */
     atualizarLista();
             };
         });
@@ -293,10 +258,10 @@
             removerBotaoCancelar();
         }, millis);
 
-		const inicio = Date.now();
-		intervaloCountdown = setInterval(() => {
-				const decorrido = Date.now() - inicio;
-				const restante = millis - decorrido;
+	const inicio = Date.now();
+	intervaloCountdown = setInterval(() => {
+			const decorrido = Date.now() - inicio;
+			const restante = millis - decorrido;
 
             if (restante <= 0) {
                 clearInterval(intervaloCountdown);
