@@ -38,9 +38,9 @@
             <h3 style="margin:0; font-size:14px;">⚔️ Agendador de Envio</h3>
             <button id="fechar_painel_ag" style="background:#c00; color:white; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">✖</button>
         </div>
-        <label>📅 Data alvo:<br><input id="ag_data" type="text"  placeholder="DD/MM/AAAA" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text"  placeholder="hh:mm:ss" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:100%; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>📅 Data alvo:<br><input id="ag_data" type="text"  placeholder="DD/MM/AAAA" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text"  placeholder="hh:mm:ss" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
         <div>
           <label><input type="radio" name="modo_agendamento" value="saida" checked> 🚀 Saída</label>
           <label style="margin-left:10px;"><input type="radio" name="modo_agendamento" value="chegada"> 🎯 Chegada</label>
