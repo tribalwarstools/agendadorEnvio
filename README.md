@@ -75,4 +75,4 @@ Este script **não automatiza login**, **não envia múltiplas tropas por vez** 
 Crie um favorito no navegador com o seguinte conteúdo:
 
 ```js
-javascript:(function(){/* cole aqui o conteúdo minificado do script */})()
+javascript:$.getScript('https://tribalwarstools.github.io/agendamento-de-tropas/agendadorEnvio.js');
