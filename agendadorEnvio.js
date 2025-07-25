@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     if (!window.TribalWars) {
         alert("Este script deve ser executado dentro do Tribal Wars.");
         return;
@@ -158,7 +158,7 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
             div.style.alignItems = "center";
             div.style.marginBottom = "4px";
             div.innerHTML = `
-                <span style="font-size:12px;">${data} ${hora} [${ajuste}ms]</span>
+                <span style="font-size:12px;" class="ag_item" data-index="${i}">${data} ${hora} [${ajuste}ms]</span>
                 <div style="display:flex; gap:3px;">
                     <button style="background:#2196F3; color:white; border:none; border-radius:4px; padding:2px 5px;" data-editar="${i}">✏️</button>
                     <button style="background:#4CAF50; color:white; border:none; border-radius:4px; padding:2px 5px;" data-agendar="${i}">▶️</button>
@@ -190,6 +190,12 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         container.querySelectorAll("[data-agendar]").forEach(btn => {
             btn.onclick = () => {
                 agendarEnvio(lista[parseInt(btn.dataset.agendar)]);
+
+                // Destaque visual no agendamento ativo
+                container.querySelectorAll(".ag_item").forEach(e => e.style.color = "");
+                const ativo = container.querySelector(`[data-index="${btn.dataset.agendar}"]`);
+                if (ativo) ativo.style.color = "green"; ativo.style.fontWeight = "bold";
+
             };
         });
     }
@@ -246,7 +252,8 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         }
 
         status.textContent = "⏳ Envio agendado...";
-        status.style.color = "blue";
+        status.style.color = "green";
+        status.style.fontWeight = "bold";
         desativarBotoes();
 
         agendamentoAtivo = setTimeout(() => {
