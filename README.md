@@ -31,7 +31,8 @@ Um painel flutuante que permite **agendar automaticamente o envio de tropas** co
   - Tipografia, cores e botões no padrão do game.
 
 ---
-
+![Painel de Configuração](./print_AgendarEnvio.png)
+---
 ## 🧭 Como Usar
 
 1. Vá para a tela de **confirmação de envio de tropas** (`troop_confirm.php`).
