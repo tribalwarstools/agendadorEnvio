@@ -110,10 +110,6 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         const lista = JSON.parse(localStorage.getItem("horarios_salvos") || "[]");
         lista.push({ data, hora, ajuste });
         localStorage.setItem("horarios_salvos", JSON.stringify(lista));
-        
-    // === ANTILOGOFF ===
-
-    
 
     atualizarLista();
     });
