@@ -113,25 +113,7 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         
     // === ANTILOGOFF ===
 
-    // 1. Ping ao servidor a cada 4 minutos
-    setInterval(() => {
-        fetch('/game.php?screen=overview')
-            .then(() => console.log("[Ping] Sessão mantida"));
-    }, 1000 * 60 * 4); // 4 minutos
-
-    // 2. Simulação de movimento do mouse
-    setInterval(() => {
-        const evt = new MouseEvent('mousemove', { bubbles: true });
-        document.dispatchEvent(evt);
-        console.log("[Mouse] Movimento simulado");
-    }, 1000 * 60 * 5); // 5 minutos
-
-    // 3. Simulação de pressionamento de tecla
-    setInterval(() => {
-        const evt = new KeyboardEvent('keydown', { key: 'Shift' });
-        document.dispatchEvent(evt);
-        console.log("[Tecla] Pressionamento simulado");
-    }, 1000 * 60 * 6); // 6 minutos
+    
 
     atualizarLista();
     });
