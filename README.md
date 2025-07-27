@@ -1,6 +1,6 @@
 # 🛡️ Agendador de Envio de Tropas – Tribal Wars
 
-Um painel flutuante que permite **agendar automaticamente o envio de tropas** com precisão de milissegundos, usando o horário do servidor do Tribal Wars. Ideal para ataques cronometrados, defesas coordenadas e movimentações estratégicas.
+Um painel flutuante que permite **agendar automaticamente o envio de tropas** com precisão, usando o horário do servidor do Tribal Wars. Ideal para ataques cronometrados, defesas coordenadas e movimentações estratégicas.
 
 ---
 
