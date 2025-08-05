@@ -1,14 +1,12 @@
-/*
- * Script Tribal Wars
- * Desenvolvedor: GiovaniG
- * GitHub: https://github.com/tribalwarstools
- * Versão: 1.0.0
- * Data: 26/07/2025
- * Descrição: Script para [descrição resumida do que faz o script].
- * Compatível com Tribal Wars versão X.X
- * 
- * Uso livre para fins pessoais. Não remova esta assinatura ao redistribuir.
- */
+// ==UserScript==
+// @name         🗓️ Agendador de Envio Tribal Wars (Estilo Escuro)
+// @namespace    https://tribalwarstools.github.io/
+// @version      1.1
+// @description  Agendador de envio com estilo TW escuro e painel fixo/arrastável.
+// @match        *://*.tribalwars.*/*
+// @grant        none
+// ==/UserScript==
+
 (function () {
     if (!window.TribalWars) {
         alert("Este script deve ser executado dentro do Tribal Wars.");
@@ -18,54 +16,118 @@
     let agendamentoAtivo = null;
     let intervaloCountdown = null;
 
-    // Função para converter "HH:MM:SS" em milissegundos
+    // CSS escuro TW-style aplicado ao painel
+    const style = document.createElement('style');
+    style.textContent = `
+    #painel_agendador {
+        position: fixed;
+        top: 50px;
+        left: 20px;
+        background: #2e2e2e;
+        border: 2px solid #b79755;
+        border-radius: 6px;
+        padding: 10px 15px;
+        font-family: "Tahoma", sans-serif;
+        font-size: 14px;
+        color: #f0e6d2;
+        box-shadow: 0 0 8px rgba(0,0,0,0.8);
+        z-index: 1000;
+        width: 320px;
+        user-select: none;
+        text-align: left;
+        cursor: default;
+    }
+    #painel_agendador h3 {
+        margin: 0 0 8px 0;
+        font-weight: bold;
+        color: #d4b35d;
+        cursor: move;
+        user-select: none;
+        font-size: 15px;
+    }
+    #painel_agendador button {
+        background: #b79755;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #2e2e2e;
+        font-weight: bold;
+        width: 100%;
+        transition: background 0.3s ease;
+    }
+    #painel_agendador button:hover:not(:disabled) {
+        background: #d4b35d;
+    }
+    #painel_agendador button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    #painel_agendador input,
+    #painel_agendador select {
+        width: 100%;
+        padding: 5px;
+        margin-top: 3px;
+        margin-bottom: 8px;
+        border: 1px solid #b79755;
+        border-radius: 4px;
+        background: #3e3e3e;
+        color: #f0e6d2;
+    }
+    #painel_agendador .status {
+        margin-top: 6px;
+        font-weight: bold;
+    }
+    #painel_agendador .lista_horarios div {
+        background: #3e3e3e;
+        border-radius: 4px;
+        padding: 3px 6px;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    `;
+    document.head.appendChild(style);
+
+    // Criação do painel
+    const painel = document.createElement("div");
+    painel.id = "painel_agendador";
+    painel.innerHTML = `
+        <div id="ag_header" style="display:flex; justify-content:space-between; align-items:center; cursor:move;">
+            <h3>⚔️ Agendador de Envio</h3>
+            <button id="fechar_painel_ag" style="width:auto; background:#c00; color:white;">✖</button>
+        </div>
+        <label>📅 Data alvo:<br><input id="ag_data" type="text" placeholder="DD/MM/AAAA"></label>
+        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text" placeholder="hh:mm:ss"></label>
+        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10"></label>
+		
+		<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+		  <label style="display:flex; align-items:center; gap:5px;">
+			<input type="radio" name="modo_agendamento" value="saida" checked>Saída
+		  </label>
+		  <label style="display:flex; align-items:center; gap:5px;">
+			<input type="radio" name="modo_agendamento" value="chegada">Chegada
+		  </label>
+		</div>
+
+        <div style="display:flex; gap:8px;">
+            <button id="btn_salvar">Salvar</button>
+            <button id="btn_limpar" style="background:#a52a2a; color:white;">Limpar</button>
+        </div>
+        <div id="lista_horarios" class="lista_horarios" style="max-height:150px; overflow:auto; margin-top:10px;"></div>
+        <p id="ag_status" class="status"></p>
+    `;
+    document.body.appendChild(painel);
+
+    // Função: converter "HH:MM:SS" em ms
     function duracaoParaMs(str) {
         const [h, m, s] = str.split(":").map(Number);
         return ((h * 3600) + (m * 60) + s) * 1000;
     }
 
-    // Cria o painel flutuante
-    const painel = document.createElement("div");
-    painel.id = "painel_agendador";
-    painel.style = `
-        position:fixed;
-        top:100px;
-        right:20px;
-        width:320px;
-        z-index:99999;
-        background:#f4e4bc;
-        border:2px solid #c1a264;
-        border-radius:8px;
-        box-shadow:0 0 10px rgba(0,0,0,0.3);
-        padding:12px;
-        font-family:Verdana, sans-serif;
-        display:flex;
-        flex-direction:column;
-        gap:10px;
-    `;
-
-    painel.innerHTML = `
-        <div id="ag_header" style="display:flex; justify-content:space-between; align-items:center; cursor:move;">
-            <h3 style="margin:0; font-size:14px;">⚔️ Agendador de Envio</h3>
-            <button id="fechar_painel_ag" style="background:#c00; color:white; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">✖</button>
-        </div>
-        <label>📅 Data alvo:<br><input id="ag_data" type="text"  placeholder="DD/MM/AAAA" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text"  placeholder="hh:mm:ss" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
-        <div>
-          <label><input type="radio" name="modo_agendamento" value="saida" checked> 🚀 Saída</label>
-          <label style="margin-left:10px;"><input type="radio" name="modo_agendamento" value="chegada"> 🎯 Chegada</label>
-        </div>
-        <div style="display:flex; gap:8px;">
-            <button id="btn_salvar" class="btn" style="flex:1; background:#6b8e23; color:white; border:none; border-radius:5px; padding:6px;">💾 Salvar</button>
-            <button id="btn_limpar" class="btn" style="flex:1; background:#a52a2a; color:white; border:none; border-radius:5px; padding:6px;">🗑️ Limpar</button>
-        </div>
-        <div id="lista_horarios" style="max-height:150px; overflow:auto; border:1px solid #c1a264; padding:5px; background:#fff8dc; border-radius:5px;"></div>
-        <p id="ag_status" style="font-weight:bold;"></p>
-    `;
-
-    document.body.appendChild(painel);
-const dataServidor = document.getElementById("serverDate")?.textContent.trim();
+    // Preenche data/hora do servidor automaticamente
+    const dataServidor = document.getElementById("serverDate")?.textContent.trim();
     const horaServidor = document.getElementById("serverTime")?.textContent.trim();
     if (dataServidor && horaServidor) {
         document.getElementById("ag_data").value = dataServidor;
@@ -99,15 +161,16 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         });
     })(painel, document.getElementById("ag_header"));
 
-    document.getElementById("fechar_painel_ag").addEventListener("click", () => {
+    // Funções principais: salvar, limpar, atualizar, agendar
+    document.getElementById("fechar_painel_ag").onclick = () => {
         if (agendamentoAtivo) {
             alert("⛔ Não é possível fechar o painel com agendamento ativo.");
         } else {
             painel.remove();
         }
-    });
+    };
 
-    document.getElementById("btn_salvar").addEventListener("click", () => {
+    document.getElementById("btn_salvar").onclick = () => {
         const data = document.getElementById("ag_data").value.trim();
         const hora = document.getElementById("ag_hora").value.trim();
         const ajuste = parseInt(document.getElementById("ajuste_fino").value, 10) || 0;
@@ -121,19 +184,15 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         const lista = JSON.parse(localStorage.getItem("horarios_salvos") || "[]");
         lista.push({ data, hora, ajuste });
         localStorage.setItem("horarios_salvos", JSON.stringify(lista));
+        atualizarLista();
+    };
 
-    atualizarLista();
-    });
-
-    document.getElementById("btn_limpar").addEventListener("click", () => {
+    document.getElementById("btn_limpar").onclick = () => {
         if (confirm("Deseja apagar todos os horários salvos?")) {
             localStorage.removeItem("horarios_salvos");
-            
-
-
-    atualizarLista();
+            atualizarLista();
         }
-    });
+    };
 
     function atualizarLista() {
         const container = document.getElementById("lista_horarios");
@@ -142,16 +201,12 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
 
         lista.forEach(({ data, hora, ajuste }, i) => {
             const div = document.createElement("div");
-            div.style.display = "flex";
-            div.style.justifyContent = "space-between";
-            div.style.alignItems = "center";
-            div.style.marginBottom = "4px";
             div.innerHTML = `
-                <span style="font-size:12px;" class="ag_item" data-index="${i}">${data} ${hora} [${ajuste}ms]</span>
+                <span class="ag_item" data-index="${i}" style="font-size:12px;">${data} ${hora} [${ajuste}ms]</span>
                 <div style="display:flex; gap:3px;">
-                    <button style="background:#2196F3; color:white; border:none; border-radius:4px; padding:2px 5px;" data-editar="${i}">✏️</button>
-                    <button style="background:#4CAF50; color:white; border:none; border-radius:4px; padding:2px 5px;" data-agendar="${i}">▶️</button>
-                    <button style="background:#f44336; color:white; border:none; border-radius:4px; padding:2px 5px;" data-remover="${i}">❌</button>
+                    <button style="width:auto;" data-editar="${i}">✏️</button>
+                    <button style="width:auto;" data-agendar="${i}">▶️</button>
+                    <button style="width:auto;" data-remover="${i}">❌</button>
                 </div>
             `;
             container.appendChild(div);
@@ -170,21 +225,13 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
             btn.onclick = () => {
                 lista.splice(parseInt(btn.dataset.remover), 1);
                 localStorage.setItem("horarios_salvos", JSON.stringify(lista));
-                
-
-    atualizarLista();
+                atualizarLista();
             };
         });
 
         container.querySelectorAll("[data-agendar]").forEach(btn => {
             btn.onclick = () => {
                 agendarEnvio(lista[parseInt(btn.dataset.agendar)]);
-
-                // Destaque visual no agendamento ativo
-                container.querySelectorAll(".ag_item").forEach(e => e.style.color = "");
-                const ativo = container.querySelector(`[data-index="${btn.dataset.agendar}"]`);
-                if (ativo) ativo.style.color = "green"; ativo.style.fontWeight = "bold";
-
             };
         });
     }
@@ -195,13 +242,8 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
         const serverDate = new Date(sy, sm - 1, sd, sh, smi, ss);
         const offset = serverDate - new Date();
 
-        // Pega o modo de agendamento selecionado
         const modo = document.querySelector('input[name="modo_agendamento"]:checked').value;
-
-        // Pega a duração da viagem (tempo de viagem)
         const duracaoTexto = (() => {
-            // tenta encontrar o tempo da viagem na tabela de comando
-            // Ajuste o seletor conforme necessário na sua página
             const linhas = document.querySelectorAll("table.vis tr");
             for (const linha of linhas) {
                 const celulas = linha.querySelectorAll("td");
@@ -211,20 +253,11 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
             }
             return "0:0:0";
         })();
-
         const tempoViagem = duracaoParaMs(duracaoTexto);
-
         const [td, tm, ty] = data.split("/").map(Number);
         const [th, tmin, ts] = hora.split(":").map(Number);
         const target = new Date(ty, tm - 1, td, th, tmin, ts);
-
-        let horarioEnvio;
-        if (modo === "chegada") {
-            horarioEnvio = new Date(target.getTime() - tempoViagem);
-        } else {
-            horarioEnvio = target;
-        }
-
+        let horarioEnvio = modo === "chegada" ? new Date(target - tempoViagem) : target;
         const millis = horarioEnvio - new Date() - offset + ajuste;
 
         if (millis < 0) {
@@ -242,112 +275,39 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
 
         status.textContent = "⏳ Envio agendado...";
         status.style.color = "green";
-        status.style.fontWeight = "bold";
-        desativarBotoes();
-
         agendamentoAtivo = setTimeout(() => {
             btn.click();
             status.textContent = `✔️ Tropas enviadas com ajuste de ${ajuste}ms!`;
-            status.style.color = "green";
             agendamentoAtivo = null;
-            reativarBotoes();
-            removerBotaoCancelar();
         }, millis);
+		
+		const inicio = Date.now();
+intervaloCountdown = setInterval(() => {
+    const decorrido = Date.now() - inicio;
+    const restante = millis - decorrido;
 
-	const inicio = Date.now();
-	intervaloCountdown = setInterval(() => {
-			const decorrido = Date.now() - inicio;
-			const restante = millis - decorrido;
-
-            if (restante <= 0) {
-                clearInterval(intervaloCountdown);
-            } else {
-                const segundos = Math.floor(restante / 1000);
-                const dias = Math.floor(segundos / 86400);
-                const horas = Math.floor((segundos % 86400) / 3600);
-                const minutos = Math.floor((segundos % 3600) / 60);
-                const seg = segundos % 60;
-
-                let tempoStr = "⏳ Enviando em ";
-                if (dias > 0) tempoStr += `${dias}d `;
-                if (horas > 0 || dias > 0) tempoStr += `${horas}h `;
-                if (minutos > 0 || horas > 0 || dias > 0) tempoStr += `${minutos}m `;
-                tempoStr += `${seg}s`;
-
-                status.innerHTML = tempoStr.trim();
-            }
-        }, 250);
-
-        criarBotaoCancelar();
-    }
-
-    function cancelarAgendamento() {
-        clearTimeout(agendamentoAtivo);
+    if (restante <= 0) {
         clearInterval(intervaloCountdown);
-        agendamentoAtivo = null;
-        status.textContent = "❌ Agendamento cancelado.";
-        status.style.color = "orange";
-        reativarBotoes();
-        removerBotaoCancelar();
+    } else {
+        const segundos = Math.floor(restante / 1000);
+        const dias = Math.floor(segundos / 86400);
+        const horas = Math.floor((segundos % 86400) / 3600);
+        const minutos = Math.floor((segundos % 3600) / 60);
+        const seg = segundos % 60;
+
+        let tempoStr = "⏳ Enviando em ";
+        if (dias > 0) tempoStr += `${dias}d `;
+        if (horas > 0 || dias > 0) tempoStr += `${horas}h `;
+        if (minutos > 0 || horas > 0 || dias > 0) tempoStr += `${minutos}m `;
+        tempoStr += `${seg}s`;
+
+        status.textContent = tempoStr.trim();
+        status.style.color = "gold";
     }
+}, 250);
 
-    function criarBotaoCancelar() {
-        removerBotaoCancelar();
-        const btnCancelar = document.createElement("button");
-        btnCancelar.textContent = "🛑 Cancelar";
-        btnCancelar.id = "cancelar_envio";
-        btnCancelar.className = "btn";
-        btnCancelar.style = "margin-top:5px; background:#ff9800; color:white; border:none; border-radius:5px; padding:6px; width:100%; cursor:pointer;";
-        status.parentElement.appendChild(btnCancelar);
-        btnCancelar.addEventListener("click", cancelarAgendamento);
+		
     }
-
-    function removerBotaoCancelar() {
-        const b = document.getElementById("cancelar_envio");
-        if (b) b.remove();
-    }
-
-    function desativarBotoes() {
-        document.getElementById("btn_salvar").disabled = true;
-        document.getElementById("btn_limpar").disabled = true;
-        document.querySelectorAll("[data-agendar], [data-editar], [data-remover]").forEach(b => b.disabled = true);
-    }
-
-    function reativarBotoes() {
-        document.getElementById("btn_salvar").disabled = false;
-        document.getElementById("btn_limpar").disabled = false;
-        document.querySelectorAll("[data-agendar], [data-editar], [data-remover]").forEach(b => b.disabled = false);
-    }
-
-    window.addEventListener("beforeunload", function (e) {
-        if (agendamentoAtivo) {
-            e.preventDefault();
-            e.returnValue = "";
-        }
-    });
-
-    
-    // === ANTILOGOFF ===
-
-    // 1. Ping ao servidor a cada 4 minutos
-    setInterval(() => {
-        fetch('/game.php?screen=overview')
-            .then(() => console.log("[Ping] Sessão mantida"));
-    }, 1000 * 60 * 4); // 4 minutos
-
-    // 2. Simulação de movimento do mouse
-    setInterval(() => {
-        const evt = new MouseEvent('mousemove', { bubbles: true });
-        document.dispatchEvent(evt);
-        console.log("[Mouse] Movimento simulado");
-    }, 1000 * 60 * 5); // 5 minutos
-
-    // 3. Simulação de pressionamento de tecla
-    setInterval(() => {
-        const evt = new KeyboardEvent('keydown', { key: 'Shift' });
-        document.dispatchEvent(evt);
-        console.log("[Tecla] Pressionamento simulado");
-    }, 1000 * 60 * 6); // 6 minutos
 
     atualizarLista();
 })();
