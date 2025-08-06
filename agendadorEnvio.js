@@ -8,6 +8,11 @@
         const style = document.createElement('style');
         style.textContent = `
             .twPainel {
+
+		position: fixed;
+		top: 50%;
+		left: 20px; /* ou 0px se quiser totalmente encostado */
+		transform: translateY(-50%);
                 background: #2e2e2e;
                 border: 2px solid #b79755;
                 border-radius: 6px;
@@ -17,13 +22,11 @@
                 color: #f5deb3;
                 z-index: 99999;
                 box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-                position: fixed;
-                top: 100px;
-                right: 20px;
                 width: 320px;
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
+
             }
 
             .twPainel h3 {
