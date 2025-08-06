@@ -10,7 +10,7 @@
             .twPainel {
 
 		position: fixed;
-		top: 50%;
+		top: 60%;
 		left: 20px; /* ou 0px se quiser totalmente encostado */
 		transform: translateY(-50%);
                 background: #2e2e2e;
