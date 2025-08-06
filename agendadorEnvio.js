@@ -1,71 +1,110 @@
-/*
- * Script Tribal Wars
- * Desenvolvedor: GiovaniG
- * GitHub: https://github.com/tribalwarstools
- * Versão: 1.0.0
- * Data: 26/07/2025
- * Descrição: Script para [descrição resumida do que faz o script].
- * Compatível com Tribal Wars versão X.X
- * 
- * Uso livre para fins pessoais. Não remova esta assinatura ao redistribuir.
- */
 (function () {
     if (!window.TribalWars) {
         alert("Este script deve ser executado dentro do Tribal Wars.");
         return;
     }
 
+    function aplicarEstiloTWPadrao() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .twPainel {
+                background: #2e2e2e;
+                border: 2px solid #b79755;
+                border-radius: 6px;
+                padding: 10px 15px;
+                font-family: Verdana, sans-serif;
+                font-size: 13px;
+                color: #f5deb3;
+                z-index: 99999;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                width: 320px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .twPainel h3 {
+                margin: 0 0 10px;
+                font-size: 15px;
+                color: #f0e2b6;
+            }
+
+            .twPainel select, .twPainel input[type="number"], .twPainel input[type="text"], .twPainel button {
+                font-size: 13px;
+                padding: 4px 6px;
+                margin: 4px 0;
+                border-radius: 4px;
+                border: 1px solid #b79755;
+                background-color: #1c1c1c;
+                color: #f5deb3;
+            }
+
+            .twPainel button:hover {
+                background-color: #3a3a3a;
+                cursor: pointer;
+            }
+
+            .twPainel .linha {
+                margin-bottom: 8px;
+            }
+
+            .twPainel .contador {
+                font-size: 14px;
+                font-weight: bold;
+                margin-left: 6px;
+                color: #ffd700;
+            }
+
+            .twPainel .btn-verde { background: #6b8e23; color: white; }
+            .twPainel .btn-vermelho { background: #a52a2a; color: white; }
+            .twPainel .btn-azul { background: #2196F3; color: white; }
+            .twPainel .btn-verde-claro { background: #4CAF50; color: white; }
+            .twPainel .btn-laranja { background: #ff9800; color: white; }
+            .twPainel .btn-vermelho-claro { background: #f44336; color: white; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    aplicarEstiloTWPadrao();
+
     let agendamentoAtivo = null;
     let intervaloCountdown = null;
 
-    // Função para converter "HH:MM:SS" em milissegundos
     function duracaoParaMs(str) {
         const [h, m, s] = str.split(":").map(Number);
         return ((h * 3600) + (m * 60) + s) * 1000;
     }
 
-    // Cria o painel flutuante
     const painel = document.createElement("div");
     painel.id = "painel_agendador";
-    painel.style = `
-        position:fixed;
-        top:100px;
-        right:20px;
-        width:320px;
-        z-index:99999;
-        background:#f4e4bc;
-        border:2px solid #c1a264;
-        border-radius:8px;
-        box-shadow:0 0 10px rgba(0,0,0,0.3);
-        padding:12px;
-        font-family:Verdana, sans-serif;
-        display:flex;
-        flex-direction:column;
-        gap:10px;
-    `;
+    painel.className = "twPainel";
 
     painel.innerHTML = `
         <div id="ag_header" style="display:flex; justify-content:space-between; align-items:center; cursor:move;">
-            <h3 style="margin:0; font-size:14px;">⚔️ Agendador de Envio</h3>
+            <h3>⚔️ Agendador de Envio</h3>
             <button id="fechar_painel_ag" style="background:#c00; color:white; border:none; border-radius:4px; padding:2px 6px; font-weight:bold;">✖</button>
         </div>
-        <label>📅 Data alvo:<br><input id="ag_data" type="text"  placeholder="DD/MM/AAAA" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text"  placeholder="hh:mm:ss" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
-        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10" style="padding:5px; width:auto; border:1px solid #c1a264; border-radius:5px;"></label>
+        <label>📅 Data alvo:<br><input id="ag_data" type="text" placeholder="DD/MM/AAAA"></label>
+        <label>⏰ Hora alvo:<br><input id="ag_hora" type="text" placeholder="hh:mm:ss"></label>
+        <label>⚙️ Ajuste (ms):<br><input id="ajuste_fino" type="number" value="0" step="10"></label>
         <div>
           <label><input type="radio" name="modo_agendamento" value="saida" checked> 🚀 Saída</label>
           <label style="margin-left:10px;"><input type="radio" name="modo_agendamento" value="chegada"> 🎯 Chegada</label>
         </div>
         <div style="display:flex; gap:8px;">
-            <button id="btn_salvar" class="btn" style="flex:1; background:#6b8e23; color:white; border:none; border-radius:5px; padding:6px;">💾 Salvar</button>
-            <button id="btn_limpar" class="btn" style="flex:1; background:#a52a2a; color:white; border:none; border-radius:5px; padding:6px;">🗑️ Limpar</button>
+            <button id="btn_salvar" class="btn btn-verde" style="flex:1;">💾 Salvar</button>
+            <button id="btn_limpar" class="btn btn-vermelho" style="flex:1;">🗑️ Limpar</button>
         </div>
-        <div id="lista_horarios" style="max-height:150px; overflow:auto; border:1px solid #c1a264; padding:5px; background:#fff8dc; border-radius:5px;"></div>
+        <div id="lista_horarios" style="max-height:150px; overflow:auto; border:1px solid #b79755; padding:5px; background:#1c1c1c; border-radius:5px;"></div>
         <p id="ag_status" style="font-weight:bold;"></p>
     `;
 
     document.body.appendChild(painel);
-const dataServidor = document.getElementById("serverDate")?.textContent.trim();
+
+    const dataServidor = document.getElementById("serverDate")?.textContent.trim();
     const horaServidor = document.getElementById("serverTime")?.textContent.trim();
     if (dataServidor && horaServidor) {
         document.getElementById("ag_data").value = dataServidor;
@@ -74,17 +113,14 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
 
     const status = document.getElementById("ag_status");
 
-    // Painel arrastável
     (function tornarArrastavel(painel, handle) {
         let offsetX = 0, offsetY = 0, isDragging = false;
-
         handle.addEventListener("mousedown", (e) => {
             isDragging = true;
             offsetX = e.clientX - painel.offsetLeft;
             offsetY = e.clientY - painel.offsetTop;
             document.body.style.userSelect = "none";
         });
-
         document.addEventListener("mousemove", (e) => {
             if (isDragging) {
                 painel.style.left = `${e.clientX - offsetX}px`;
@@ -92,22 +128,21 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
                 painel.style.right = "auto";
             }
         });
-
         document.addEventListener("mouseup", () => {
             isDragging = false;
             document.body.style.userSelect = "";
         });
     })(painel, document.getElementById("ag_header"));
 
-    document.getElementById("fechar_painel_ag").addEventListener("click", () => {
+    document.getElementById("fechar_painel_ag").onclick = () => {
         if (agendamentoAtivo) {
             alert("⛔ Não é possível fechar o painel com agendamento ativo.");
         } else {
             painel.remove();
         }
-    });
+    };
 
-    document.getElementById("btn_salvar").addEventListener("click", () => {
+document.getElementById("btn_salvar").addEventListener("click", () => {
         const data = document.getElementById("ag_data").value.trim();
         const hora = document.getElementById("ag_hora").value.trim();
         const ajuste = parseInt(document.getElementById("ajuste_fino").value, 10) || 0;
@@ -351,3 +386,4 @@ const dataServidor = document.getElementById("serverDate")?.textContent.trim();
 
     atualizarLista();
 })();
+
